@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎰 IA•SLOT — Usage Pédagogique de l'IA</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap');
+
+:root {
+  --gold: #FFD700;
+  --gold-dark: #B8860B;
+  --gold-light: #FFF0A0;
+  --red: #CC2200;
+  --red-bright: #FF3311;
+  --neon-green: #39FF14;
+  --neon-blue: #00F0FF;
+  --bg: #050d08;
+  --text: #f5f0e0;
+  --text-dim: rgba(245,240,224,0.52);
+  --border-gold: rgba(255,215,0,0.22);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--bg);
+  min-height: 100vh;
+  font-family: 'Space Mono', monospace;
+  color: var(--text);
+  overflow-x: hidden;
+  background-image: repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(255,215,0,0.011) 2px, rgba(255,215,0,0.011) 4px);
+}
+
+/* ── SCREEN SYSTEM ── */
+.screen { display:none; min-height:100vh; }
+.screen.active { display:block; }
+
+/* ── SHARED HEADER ── */
+.casino-header { text-align:center; padding:26px 20px 6px; }
+.casino-title {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(2.2rem,6vw,4.5rem);
+  letter-spacing:.1em; color:var(--gold);
+  text-shadow:0 0 10px var(--gold),0 0 40px rgba(255,215,0,.35),3px 3px 0 var(--red),6px 6px 0 var(--gold-dark);
+  line-height:1;
+}
+.casino-subtitle {
+  font-size:.68rem; letter-spacing:.28em; color:var(--neon-green);
+  text-shadow:0 0 12px rgba(57,255,20,.6); text-transform:uppercase; margin-top:5px;
+}
+.bulbs-row { display:flex; justify-content:center; gap:10px; padding:10px 0 5px; }
+.bulb {
+  width:12px; height:12px; border-radius:50%;
+  background:var(--gold); box-shadow:0 0 7px var(--gold);
+  animation:blink 1.3s infinite alternate;
+}
+.bulb:nth-child(2n){animation-delay:.3s;background:var(--red-bright);box-shadow:0 0 7px var(--red-bright);}
+.bulb:nth-child(3n){animation-delay:.6s;}
+@keyframes blink{0%,85%{opacity:1}92%{opacity:.14}100%{opacity:1}}
+
+/* ════════════════════════════════
+   SCREEN 1 — CONFIG
+════════════════════════════════ */
+#screenConfig { padding-bottom:60px; }
+
+.config-panels { display:flex; flex-direction:column; gap:18px; max-width:740px; margin:0 auto; padding:0 16px; }
+
+/* Reel panel */
+.config-reel {
+  background:linear-gradient(135deg,#0e2216 0%,#091408 100%);
+  border:2px solid var(--border-gold); border-radius:14px; overflow:hidden;
+}
+.config-reel-header {
+  display:flex; align-items:center; gap:10px;
+  padding:13px 20px; background:rgba(0,0,0,.42); border-bottom:1px solid var(--border-gold);
+}
+.rh-icon { font-size:1.25rem; }
+.rh-title { font-family:'Bebas Neue',sans-serif; font-size:1.05rem; letter-spacing:.2em; color:var(--gold); flex:1; }
+
+.config-items { padding:12px 14px; display:flex; flex-direction:column; gap:7px; }
+
+.config-item {
+  display:flex; align-items:center; gap:10px;
+  padding:10px 14px; border-radius:8px;
+  border:1.5px solid rgba(255,215,0,.1); background:rgba(0,0,0,.35);
+  cursor:pointer; user-select:none; transition:all .18s;
+}
+.config-item:hover { border-color:rgba(255,215,0,.28); background:rgba(0,0,0,.5); }
+.config-item.active { border-color:rgba(255,215,0,.48); background:rgba(255,215,0,.055); }
+.config-item.inactive { opacity:.36; border-color:rgba(255,255,255,.06); }
+
+.ci-check {
+  width:20px; height:20px; border-radius:5px;
+  border:2px solid rgba(255,215,0,.28); background:rgba(0,0,0,.5);
+  flex-shrink:0; display:flex; align-items:center; justify-content:center;
+  font-size:.78rem; transition:all .15s;
+}
+.config-item.active .ci-check { background:var(--gold); border-color:var(--gold); color:#000; }
+.ci-icon { font-size:1.15rem; flex-shrink:0; }
+.ci-name { font-size:.72rem; font-weight:700; color:var(--gold-light); flex:1; }
+.ci-del {
+  background:none; border:none; color:rgba(255,100,100,.45);
+  font-size:.9rem; cursor:pointer; padding:2px 4px; flex-shrink:0; transition:color .15s;
+}
+.ci-del:hover { color:rgba(255,100,100,.85); }
+
+/* Add custom */
+.add-custom-row { padding:2px 14px 13px; }
+.add-custom-btn {
+  width:100%; padding:9px;
+  background:transparent; border:1.5px dashed rgba(255,215,0,.18); border-radius:8px;
+  color:rgba(255,215,0,.38); font-family:'Space Mono',monospace;
+  font-size:.63rem; letter-spacing:.15em; cursor:pointer; transition:all .2s; text-transform:uppercase;
+}
+.add-custom-btn:hover { border-color:rgba(255,215,0,.5); color:var(--gold); background:rgba(255,215,0,.03); }
+
+.custom-form {
+  display:none; flex-direction:column; gap:7px;
+  padding:12px; background:rgba(0,0,0,.42);
+  border:1px solid rgba(255,215,0,.14); border-radius:8px; margin-top:7px;
+}
+.custom-form.open { display:flex; }
+.custom-form input, .custom-form textarea {
+  background:rgba(0,0,0,.6); border:1px solid rgba(255,215,0,.18); border-radius:6px;
+  padding:7px 10px; color:var(--text); font-family:'Space Mono',monospace;
+  font-size:.67rem; outline:none; resize:vertical;
+}
+.custom-form input:focus, .custom-form textarea:focus { border-color:rgba(255,215,0,.5); }
+.custom-form input::placeholder, .custom-form textarea::placeholder { color:rgba(255,255,255,.22); }
+.cf-row { display:flex; gap:7px; }
+.cf-row input { flex:1; }
+.cf-confirm {
+  padding:8px 18px; background:var(--gold); color:#000;
+  border:none; border-radius:6px; font-family:'Bebas Neue',sans-serif;
+  font-size:.95rem; letter-spacing:.15em; cursor:pointer; white-space:nowrap; transition:opacity .15s;
+}
+.cf-confirm:hover { opacity:.85; }
+.cf-cancel {
+  padding:8px 12px; background:transparent; color:var(--text-dim);
+  border:1px solid rgba(255,255,255,.14); border-radius:6px;
+  font-family:'Space Mono',monospace; font-size:.63rem; cursor:pointer;
+}
+
+/* CTA */
+.config-cta {
+  max-width:740px; margin:26px auto 0; padding:0 16px;
+  display:flex; flex-direction:column; align-items:center; gap:10px;
+}
+.config-warning {
+  font-size:.62rem; color:var(--red-bright); letter-spacing:.1em; display:none;
+  text-align:center; line-height:1.6;
+}
+.launch-btn {
+  padding:17px 52px; font-family:'Bebas Neue',sans-serif;
+  font-size:1.75rem; letter-spacing:.25em; color:#000;
+  background:linear-gradient(180deg,var(--gold-light) 0%,var(--gold) 40%,var(--gold-dark) 100%);
+  border:none; border-radius:10px; cursor:pointer;
+  box-shadow:0 5px 0 var(--gold-dark),0 8px 28px rgba(255,215,0,.28);
+  transition:all .1s; position:relative; overflow:hidden;
+}
+.launch-btn::after {
+  content:''; position:absolute; top:0; left:-100%;
+  width:60%; height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.32),transparent);
+  transition:left .5s;
+}
+.launch-btn:hover::after { left:150%; }
+.launch-btn:hover { transform:translateY(2px); box-shadow:0 3px 0 var(--gold-dark); }
+.launch-btn:active { transform:translateY(5px); box-shadow:none; }
+
+/* ════════════════════════════════
+   SCREEN 2 — SLOT
+════════════════════════════════ */
+#screenSlot { padding-bottom:60px; }
+
+.back-row { display:flex; justify-content:center; padding:0 20px 4px; }
+.back-btn {
+  background:transparent; border:1px solid rgba(255,215,0,.18); border-radius:6px;
+  color:var(--text-dim); font-family:'Space Mono',monospace;
+  font-size:.6rem; letter-spacing:.15em; padding:6px 14px;
+  cursor:pointer; transition:all .2s; text-transform:uppercase;
+}
+.back-btn:hover { border-color:var(--gold); color:var(--gold); }
+
+.machine-wrapper { display:flex; flex-direction:column; align-items:center; padding:0 16px 20px; gap:16px; }
+
+.machine {
+  background:linear-gradient(180deg,#1a1a2e 0%,#0d1117 40%,#0a1a0f 100%);
+  border:3px solid var(--gold-dark); border-radius:20px 20px 36px 36px;
+  padding:22px 22px 28px; width:100%; max-width:680px; position:relative;
+  box-shadow:0 0 0 1px rgba(255,215,0,.07),0 20px 60px rgba(0,0,0,.8),inset 0 1px 0 rgba(255,215,0,.14);
+}
+.machine::before {
+  content:''; position:absolute; top:7px; left:7px; right:7px; bottom:7px;
+  border:1px solid rgba(255,215,0,.05); border-radius:14px 14px 30px 30px; pointer-events:none;
+}
+
+.reels-container {
+  background:#000; border:3px solid var(--gold-dark); border-radius:12px;
+  padding:13px 9px; display:flex; gap:7px;
+  box-shadow:inset 0 0 40px rgba(0,0,0,.9); margin-bottom:16px;
+}
+.reel-wrapper { flex:1; display:flex; flex-direction:column; align-items:center; gap:5px; }
+.reel-label { font-family:'Bebas Neue',sans-serif; font-size:.78rem; letter-spacing:.14em; color:var(--gold-dark); }
+.reel-window {
+  width:100%; height:118px; overflow:hidden;
+  border:2px solid rgba(255,215,0,.22); border-radius:8px; background:#000; position:relative;
+}
+.reel-window::before,.reel-window::after {
+  content:''; position:absolute; left:0; right:0; height:30px; z-index:2; pointer-events:none;
+}
+.reel-window::before { top:0; background:linear-gradient(180deg,rgba(0,0,0,.95),transparent); }
+.reel-window::after  { bottom:0; background:linear-gradient(0deg,rgba(0,0,0,.95),transparent); }
+.reel-strip { display:flex; flex-direction:column; will-change:transform; }
+.reel-item {
+  height:118px; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  padding:5px 3px; text-align:center; border-bottom:1px solid rgba(255,215,0,.04);
+}
+.reel-item .icon { font-size:1.55rem; margin-bottom:3px; display:block; }
+.reel-item .label { font-size:.48rem; line-height:1.3; color:var(--gold-light); text-transform:uppercase; letter-spacing:.04em; white-space:pre-line; }
+
+.spinning .reel-strip { animation:spinReel .13s linear infinite; }
+@keyframes spinReel { 100%{transform:translateY(-118px)} }
+
+.result-box {
+  background:rgba(0,0,0,.8); border:2px solid var(--gold-dark); border-radius:10px;
+  padding:13px 17px; margin-bottom:14px; min-height:70px; position:relative;
+}
+.result-box::before {
+  content:'▶ COMBINAISON'; position:absolute; top:7px; left:14px;
+  font-size:.57rem; letter-spacing:.3em; color:var(--neon-green);
+  text-shadow:0 0 10px rgba(57,255,20,.45);
+}
+.result-content { margin-top:15px; font-size:.68rem; line-height:1.78; font-style:italic; }
+.result-content strong { color:var(--gold); font-style:normal; }
+.win-flash { animation:wf .45s ease-in-out 4; }
+@keyframes wf { 50%{border-color:var(--gold);box-shadow:0 0 16px var(--gold);} }
+
+.prompt-output {
+  background:rgba(0,0,0,.7); border:2px solid rgba(0,240,255,.22); border-radius:10px;
+  padding:13px 17px; font-size:.68rem; line-height:1.82; color:var(--neon-blue);
+  display:none; margin-bottom:14px; word-break:break-word;
+}
+.prompt-output.visible { display:block; }
+.prompt-output::before {
+  content:'⬡ SUGGESTION DE PROMPT'; display:block;
+  font-size:.57rem; letter-spacing:.28em; color:rgba(0,240,255,.38); margin-bottom:8px;
+}
+.prompt-text { color:#e0fffe; font-style:italic; white-space:pre-wrap; }
+
+.controls-row { display:flex; gap:9px; align-items:center; justify-content:center; }
+.spin-btn {
+  flex:1; max-width:200px; padding:14px;
+  font-family:'Bebas Neue',sans-serif; font-size:1.35rem; letter-spacing:.2em; color:#000;
+  background:linear-gradient(180deg,var(--gold-light) 0%,var(--gold) 40%,var(--gold-dark) 100%);
+  border:none; border-radius:8px; cursor:pointer;
+  box-shadow:0 4px 0 var(--gold-dark),0 6px 16px rgba(255,215,0,.22);
+  transition:all .1s; position:relative; overflow:hidden;
+}
+.spin-btn::after {
+  content:''; position:absolute; top:0; left:-100%;
+  width:60%; height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.32),transparent);
+  transition:left .5s;
+}
+.spin-btn:hover::after { left:150%; }
+.spin-btn:hover { transform:translateY(1px); box-shadow:0 3px 0 var(--gold-dark); }
+.spin-btn:active { transform:translateY(4px); box-shadow:none; }
+.spin-btn:disabled { opacity:.5; cursor:not-allowed; transform:none; }
+
+.copy-btn {
+  padding:14px 16px; font-family:'Space Mono',monospace; font-size:.63rem;
+  letter-spacing:.1em; color:var(--neon-green); background:transparent;
+  border:2px solid var(--neon-green); border-radius:8px; cursor:pointer;
+  box-shadow:0 0 8px rgba(57,255,20,.12); transition:all .2s; text-transform:uppercase;
+}
+.copy-btn:hover { background:rgba(57,255,20,.07); box-shadow:0 0 18px rgba(57,255,20,.32); }
+.copy-btn:disabled { opacity:.35; cursor:not-allowed; }
+
+/* Summary pills */
+.active-summary { max-width:680px; width:100%; display:flex; gap:9px; flex-wrap:wrap; }
+.summary-col {
+  flex:1; min-width:150px; background:rgba(10,46,26,.5);
+  border:1px solid var(--border-gold); border-radius:10px; padding:11px 13px;
+}
+.summary-col-title {
+  font-family:'Bebas Neue',sans-serif; font-size:.78rem; letter-spacing:.15em;
+  color:var(--gold); margin-bottom:7px;
+}
+.summary-pill {
+  display:inline-flex; align-items:center; gap:4px;
+  background:rgba(0,0,0,.4); border:1px solid rgba(255,215,0,.1);
+  border-radius:20px; padding:3px 8px; font-size:.58rem; color:var(--text-dim); margin:2px 2px 2px 0;
+}
+
+/* Jackpot */
+.jackpot-overlay {
+  display:none; position:fixed; inset:0; background:rgba(0,0,0,.88);
+  z-index:200; justify-content:center; align-items:center; flex-direction:column; gap:20px;
+}
+.jackpot-overlay.show { display:flex; }
+.jackpot-text {
+  font-family:'Bebas Neue',sans-serif; font-size:clamp(2.5rem,10vw,7rem); color:var(--gold);
+  text-shadow:0 0 40px var(--gold),0 0 80px rgba(255,215,0,.4),4px 4px 0 var(--red);
+  animation:jp .5s ease-in-out infinite alternate; text-align:center; line-height:1.1;
+}
+@keyframes jp { from{transform:scale(1)} to{transform:scale(1.04)} }
+.jackpot-close {
+  padding:12px 42px; font-family:'Bebas Neue',sans-serif; font-size:1.2rem;
+  letter-spacing:.3em; color:#000; background:var(--gold); border:none; border-radius:8px; cursor:pointer;
+}
+
+/* Toast */
+.toast {
+  position:fixed; bottom:26px; left:50%;
+  transform:translateX(-50%) translateY(14px);
+  background:var(--neon-green); color:#000; padding:9px 22px;
+  border-radius:30px; font-size:.7rem; font-weight:700; letter-spacing:.1em;
+  opacity:0; transition:all .28s; pointer-events:none; z-index:300;
+}
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+@media(max-width:480px){
+  .reel-window{height:95px} .reel-item{height:95px} .reel-item .icon{font-size:1.3rem}
+  @keyframes spinReel{100%{transform:translateY(-95px)}}
+  .machine{padding:13px 9px 20px}
+}
+</style>
+</head>
+<body>
+
+<div class="jackpot-overlay" id="jackpotOverlay">
+  <div class="jackpot-text">🎰 JACKPOT !<br><span style="font-size:.44em;color:var(--gold-light)">COMBINAISON PARFAITE</span></div>
+  <button class="jackpot-close" onclick="document.getElementById('jackpotOverlay').classList.remove('show')">CONTINUER</button>
+</div>
+<div class="toast" id="toast">✓ Prompt copié !</div>
+
+<!-- ════════════════ SCREEN CONFIG ════════════════ -->
+<div class="screen active" id="screenConfig">
+  <div class="casino-header">
+    <div class="bulbs-row" id="b1"></div>
+    <div class="casino-title">IA • SLOT</div>
+    <div class="casino-subtitle">⚙ Choisissez les éléments de chaque rouleau</div>
+    <div class="bulbs-row" id="b2"></div>
+  </div>
+
+  <div class="config-panels" id="configPanels"></div>
+
+  <div class="config-cta">
+    <div class="config-warning" id="configWarning"></div>
+    <button class="launch-btn" onclick="launchSlot()">🎰 LANCER LA MACHINE</button>
+  </div>
+</div>
+
+<!-- ════════════════ SCREEN SLOT ════════════════ -->
+<div class="screen" id="screenSlot">
+  <div class="casino-header">
+    <div class="bulbs-row" id="b3"></div>
+    <div class="casino-title">IA • SLOT</div>
+    <div class="casino-subtitle">Tirage pédagogique</div>
+    <div class="bulbs-row" id="b4"></div>
+  </div>
+
+  <div class="back-row">
+    <button class="back-btn" onclick="goConfig()">← Reconfigurer les rouleaux</button>
+  </div>
+
+  <div class="machine-wrapper">
+    <div class="machine">
+      <div class="reels-container">
+        <div class="reel-wrapper">
+          <div class="reel-label">⏱ Temporalité</div>
+          <div class="reel-window" id="reel0"><div class="reel-strip" id="strip0"></div></div>
+        </div>
+        <div class="reel-wrapper">
+          <div class="reel-label">🤖 Posture IA</div>
+          <div class="reel-window" id="reel1"><div class="reel-strip" id="strip1"></div></div>
+        </div>
+        <div class="reel-wrapper">
+          <div class="reel-label">🔒 Limitation</div>
+          <div class="reel-window" id="reel2"><div class="reel-strip" id="strip2"></div></div>
+        </div>
+      </div>
+
+      <div class="result-box" id="resultBox">
+        <div class="result-content" id="resultContent">
+          <span style="color:rgba(255,215,0,.32);font-size:.67rem;font-style:normal">Tirez le levier pour générer une combinaison pédagogique…</span>
+        </div>
+      </div>
+
+      <div class="prompt-output" id="promptOutput">
+        <div class="prompt-text" id="promptText"></div>
+      </div>
+
+      <div class="controls-row">
+        <button class="spin-btn" id="spinBtn" onclick="spin()">🎰 TIRER</button>
+        <button class="copy-btn" id="copyBtn" onclick="copyPrompt()" disabled>COPIER</button>
+      </div>
+    </div>
+
+    <div class="active-summary" id="activeSummary"></div>
+  </div>
+</div>
+
+<script>
+// ══════════════ DATA ══════════════
+const REEL_META = [
+  { icon:"⏱", title:"TEMPORALITÉ",  sub:"Quand l'IA intervient dans la séance" },
+  { icon:"🤖", title:"POSTURE IA",   sub:"Comment l'IA doit se comporter" },
+  { icon:"🔒", title:"LIMITATION",   sub:"Contrainte imposée au prompt élève" }
+];
+
+// Deep-cloned working copy
+let reelItems = [
+  [
+    { icon:"🌅", label:"10 premières\nminutes", name:"Amorce",
+      desc:"L'IA lance l'activité, active les représentations avant que l'enseignant prenne la main.",
+      promptSnippet:"en moins de 5 phrases, sans développement, comme point de départ pour une classe qui découvre le sujet",
+      systemNote:"Utiliser dans les 10 premières minutes du cours — phase d'accroche", active:true },
+    { icon:"🌇", label:"10 dernières\nminutes", name:"Clôture",
+      desc:"L'IA aide à synthétiser et ancrer les savoirs, ouvre sur la prochaine séance.",
+      promptSnippet:"sous forme de synthèse rapide en 3 lignes, pour mémoriser ce qui vient d'être appris",
+      systemNote:"Utiliser dans les 10 dernières minutes du cours — phase de clôture", active:true },
+    { icon:"⏰", label:"Toutes les\n15 minutes", name:"Rythme régulier",
+      desc:"L'IA intervient comme métronome pédagogique : un micro-recours pour relancer l'attention.",
+      promptSnippet:"en une seule phrase d'accroche, pour relancer l'attention de la classe sur le sujet",
+      systemNote:"Utiliser toutes les 15 minutes comme relanceur d'attention", active:true },
+    { icon:"⏳", label:"3 fois max\n3 minutes", name:"Sprint IA",
+      desc:"Trois fenêtres strictement minutées. L'urgence force la précision du prompt.",
+      promptSnippet:"en 3 minutes maximum, réponse ultra-concise de 2-3 lignes, pas d'introduction",
+      systemNote:"Usage limité à 3 sprints de 3 minutes max dans la séance", active:true }
+  ],
+  [
+    { icon:"🧭", label:"Pistes sans\nréponse", name:"Guide heuristique",
+      desc:"L'IA ouvre des chemins mais ne donne pas la destination. L'élève reste acteur.",
+      promptSnippet:"donne uniquement des pistes de réflexion et des questions à explorer, sans jamais donner la réponse directe",
+      systemNote:"Posture : l'IA guide sans répondre — développe l'autonomie", active:true },
+    { icon:"📐", label:"Réponse en\ntrois points", name:"Structure ternaire",
+      desc:"L'IA structure sa réponse en exactement trois idées clés. Format lisible et mémorisable.",
+      promptSnippet:"structurer ta réponse en exactement 3 points numérotés, un seul élément par point",
+      systemNote:"Posture : réponse contrainte en 3 points exactement", active:true },
+    { icon:"📚", label:"Juste des\nsources", name:"Bibliographe",
+      desc:"L'IA indique uniquement des ressources, auteurs, références — aucun contenu propre.",
+      promptSnippet:"cite uniquement des sources, auteurs ou références utiles — aucune explication, juste les ressources",
+      systemNote:"Posture : l'IA comme bibliographe — que des références", active:true }
+  ],
+  [
+    { icon:"🚫", label:"Ne pas reprendre\nla consigne", name:"Anti-perroquet",
+      desc:"L'IA plonge directement dans la valeur ajoutée, sans reformuler l'énoncé.",
+      promptSnippet:"ne répète pas ma question, commence directement ta réponse sans reformuler la consigne",
+      systemNote:"Contrainte : l'IA ne répète pas l'énoncé — aller droit au but", active:true },
+    { icon:"✂️", label:"Prompt de\n20 mots", name:"Contrainte lexicale",
+      desc:"Le prompt élève ne peut dépasser 20 mots. Forcer la concision oblige à identifier l'essentiel.",
+      promptSnippet:"note : ce prompt fait exactement 20 mots — réponds en respectant cette même économie de langage",
+      systemNote:"Contrainte élève : prompt limité à 20 mots exactement", active:true },
+    { icon:"🔤", label:"Pas de\nverbe", name:"Prompt nominal",
+      desc:"Le prompt est rédigé sans aucun verbe conjugué — style télégraphique.",
+      promptSnippet:"ce prompt est rédigé sans verbe conjugué — structure ta réponse de façon synthétique et directe",
+      systemNote:"Contrainte élève : prompt sans verbe conjugué — style nominal", active:true }
+  ]
+];
+
+let spinning = false;
+let currentPrompt = "";
+
+// ══════════════ BULBS ══════════════
+['b1','b2','b3','b4'].forEach(id => {
+  const el = document.getElementById(id);
+  if(el) el.innerHTML = Array.from({length:13},()=>'<div class="bulb"></div>').join('');
+});
+
+// ══════════════ CONFIG BUILD ══════════════
+function buildConfig() {
+  const container = document.getElementById('configPanels');
+  container.innerHTML = '';
+  reelItems.forEach((items, r) => {
+    const meta = REEL_META[r];
+    const panel = document.createElement('div');
+    panel.className = 'config-reel';
+    panel.innerHTML = `
+      <div class="config-reel-header">
+        <span class="rh-icon">${meta.icon}</span>
+        <div class="rh-title">${meta.title}</div>
+      </div>
+      <div class="config-items" id="ci${r}"></div>
+      <div class="add-custom-row">
+        <button class="add-custom-btn" onclick="toggleCF(${r})">+ Ajouter un élément</button>
+        <div class="custom-form" id="cf${r}">
+          <div class="cf-row">
+            <input type="text" id="cf_ic${r}" placeholder="🎯" maxlength="4" style="max-width:56px;text-align:center;font-size:1.1rem">
+            <input type="text" id="cf_nm${r}" placeholder="Libellé court (ex : Mi-cours)">
+          </div>
+          <div class="cf-row">
+            <button class="cf-confirm" onclick="addCustom(${r})">AJOUTER</button>
+            <button class="cf-cancel" onclick="toggleCF(${r})">Annuler</button>
+          </div>
+        </div>
+      </div>`;
+    container.appendChild(panel);
+    renderItems(r);
+  });
+}
+
+function renderItems(r) {
+  const el = document.getElementById(`ci${r}`);
+  el.innerHTML = '';
+  reelItems[r].forEach((item, i) => {
+    const div = document.createElement('div');
+    div.className = `config-item ${item.active?'active':'inactive'}`;
+    div.onclick = () => toggleItem(r,i);
+    div.innerHTML = `
+      <div class="ci-check">${item.active?'✓':''}</div>
+      <span class="ci-icon">${item.icon}</span>
+      <span class="ci-name">${item.label.replace(/\n/,' ')}</span>
+      ${item.custom?`<button class="ci-del" onclick="event.stopPropagation();delCustom(${r},${i})" title="Supprimer">✕</button>`:''}`;
+    el.appendChild(div);
+  });
+}
+
+function updateCnt(r) {}
+
+function toggleItem(r,i) {
+  const a = reelItems[r].filter(x=>x.active).length;
+  if(reelItems[r][i].active && a<=1){ showWarning(`"${REEL_META[r].title}" doit garder au moins une option active.`); return; }
+  reelItems[r][i].active = !reelItems[r][i].active;
+  renderItems(r);
+}
+
+function toggleCF(r) { document.getElementById(`cf${r}`).classList.toggle('open'); }
+
+function addCustom(r) {
+  const icon = document.getElementById(`cf_ic${r}`).value.trim()||'⭐';
+  const name = document.getElementById(`cf_nm${r}`).value.trim();
+  if(!name){ showWarning('Remplissez le libellé de l\'élément.'); return; }
+  reelItems[r].push({
+    icon, label:name.length>14?name.substring(0,12)+'…':name, name,
+    desc:'Élément personnalisé',
+    promptSnippet:name.toLowerCase(),
+    systemNote:`Option custom : ${name}`,
+    active:true, custom:true
+  });
+  document.getElementById(`cf_ic${r}`).value='';
+  document.getElementById(`cf_nm${r}`).value='';
+  document.getElementById(`cf${r}`).classList.remove('open');
+  renderItems(r);
+}
+
+function delCustom(r,i){ reelItems[r].splice(i,1); renderItems(r); }
+
+function showWarning(msg){
+  const w=document.getElementById('configWarning');
+  w.textContent='⚠ '+msg; w.style.display='block';
+  clearTimeout(w._t); w._t=setTimeout(()=>w.style.display='none',3500);
+}
+
+// ══════════════ NAVIGATION ══════════════
+function launchSlot(){
+  for(let r=0;r<3;r++){
+    if(!reelItems[r].some(i=>i.active)){ showWarning(`Le rouleau "${REEL_META[r].title}" doit avoir au moins une option active.`); return; }
+  }
+  document.getElementById('screenConfig').classList.remove('active');
+  document.getElementById('screenSlot').classList.add('active');
+  window.scrollTo(0,0);
+  buildStrips();
+  buildSummary();
+  document.getElementById('resultContent').innerHTML='<span style="color:rgba(255,215,0,.32);font-size:.67rem;font-style:normal">Tirez le levier pour générer une combinaison pédagogique…</span>';
+  document.getElementById('promptOutput').classList.remove('visible');
+  document.getElementById('copyBtn').disabled=true;
+}
+
+function goConfig(){
+  document.getElementById('screenSlot').classList.remove('active');
+  document.getElementById('screenConfig').classList.add('active');
+  window.scrollTo(0,0);
+  buildConfig();
+}
+
+// ══════════════ SLOT ══════════════
+const active = r => reelItems[r].filter(i=>i.active);
+
+function buildStrips(){
+  for(let r=0;r<3;r++){
+    const strip=document.getElementById(`strip${r}`);
+    strip.innerHTML='';
+    const items=active(r);
+    [...items,...items,...items,...items,...items].forEach(item=>{
+      const d=document.createElement('div');
+      d.className='reel-item';
+      d.innerHTML=`<span class="icon">${item.icon}</span><span class="label">${item.label}</span>`;
+      strip.appendChild(d);
+    });
+  }
+}
+
+function buildSummary(){
+  const el=document.getElementById('activeSummary');
+  el.innerHTML='';
+  for(let r=0;r<3;r++){
+    const m=REEL_META[r];
+    const col=document.createElement('div');
+    col.className='summary-col';
+    col.innerHTML=`<div class="summary-col-title">${m.icon} ${m.title}</div>`+
+      active(r).map(i=>`<span class="summary-pill"><span style="font-size:.8rem">${i.icon}</span>${i.name}</span>`).join('');
+    el.appendChild(col);
+  }
+}
+
+function animateReel(r, targetIdx, delay, dur){
+  return new Promise(resolve=>{
+    const strip=document.getElementById(`strip${r}`);
+    const ih=strip.querySelector('.reel-item')?.offsetHeight||118;
+    const reel=document.getElementById(`reel${r}`);
+    strip.style.transition='none';
+    strip.style.transform='translateY(0)';
+    reel.classList.add('spinning');
+    setTimeout(()=>{
+      reel.classList.remove('spinning');
+      strip.style.transition=`transform .42s cubic-bezier(.25,.46,.45,.94)`;
+      strip.style.transform=`translateY(-${targetIdx*ih}px)`;
+      setTimeout(resolve,460);
+    }, delay+dur);
+  });
+}
+
+async function spin(){
+  if(spinning)return;
+  spinning=true;
+  const btn=document.getElementById('spinBtn');
+  const cpBtn=document.getElementById('copyBtn');
+  btn.disabled=true; cpBtn.disabled=true;
+  document.getElementById('promptOutput').classList.remove('visible');
+  document.getElementById('resultContent').innerHTML='<span style="color:rgba(255,215,0,.32);font-size:.67rem">⟳ Calcul de la combinaison…</span>';
+
+  const targets=[0,1,2].map(r=>Math.floor(Math.random()*active(r).length));
+
+  for(let r=0;r<3;r++){
+    const s=document.getElementById(`strip${r}`);
+    s.style.transition='none'; s.style.transform='translateY(0)';
+  }
+
+  await Promise.all([
+    animateReel(0,targets[0],0,800),
+    animateReel(1,targets[1],180,1000),
+    animateReel(2,targets[2],360,1200)
+  ]);
+
+  const t=active(0)[targets[0]];
+  const p=active(1)[targets[1]];
+  const l=active(2)[targets[2]];
+
+  const rb=document.getElementById('resultBox');
+  rb.classList.add('win-flash');
+  setTimeout(()=>rb.classList.remove('win-flash'),2200);
+
+  document.getElementById('resultContent').innerHTML=`
+    <strong>⏱ ${t.name}</strong> — ${t.systemNote}<br>
+    <strong>🤖 ${p.name}</strong> — ${p.systemNote}<br>
+    <strong>🔒 ${l.name}</strong> — ${l.systemNote}`;
+
+  currentPrompt=`[Contexte : usage pédagogique en classe — ${t.systemNote}]\n[Posture : ${p.promptSnippet}]\n[Contrainte : ${l.promptSnippet}]\n\n[Sujet / question élève à compléter ici]`;
+  document.getElementById('promptText').textContent=currentPrompt;
+  document.getElementById('promptOutput').classList.add('visible');
+  cpBtn.disabled=false;
+
+  if(targets[0]===0&&targets[1]===0&&targets[2]===0)
+    setTimeout(()=>document.getElementById('jackpotOverlay').classList.add('show'),600);
+
+  spinning=false; btn.disabled=false;
+}
+
+function copyPrompt(){
+  if(!currentPrompt)return;
+  navigator.clipboard.writeText(currentPrompt).then(()=>{
+    const t=document.getElementById('toast');
+    t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'),2500);
+  });
+}
+
+// ══════════════ INIT ══════════════
+buildConfig();
+</script>
+</body>
+</html>
